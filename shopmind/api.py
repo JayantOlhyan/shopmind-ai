@@ -3,7 +3,12 @@ import logging
 from typing import Dict, Any
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
+from dotenv import load_dotenv
+
+# Load env before importing our modules
+load_dotenv()
 
 from .models import (
     ResearchRequest, 
@@ -21,6 +26,15 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 app = FastAPI(title="ShopMind AI API", version="1.0.0")
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/research", response_model=ResearchResponse)
 async def perform_research(request: ResearchRequest):

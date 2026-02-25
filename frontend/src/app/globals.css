@@ -1,0 +1,284 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Sora:wght@600;700;800&display=swap');
+
+:root {
+  /* Common UI Variables */
+  --accent-teal: #00B4D8;
+  --accent-teal-hover: #0096B4;
+  --highlight-gold: #FFC300;
+  --accent-blue: #4F46E5;
+  --accent-orange: #FF5A1F;
+  /* Added for dark theme accent */
+  --success: #10B981;
+  --error: #EF4444;
+
+  --radius-btn: 8px;
+  --radius-card: 16px;
+  /* slightly softer for the light theme */
+}
+
+/* Light Theme (App Pages) */
+.light-theme {
+  --bg-main: #F4F7FB;
+  --surface: #FFFFFF;
+  --surface-hover: #F8FAFC;
+  --border: #E2E8F0;
+  --border-dark: #CBD5E1;
+
+  --text-dark: #0F1F3D;
+  --text-muted: #64748B;
+  --text-light: #FFFFFF;
+
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 10px 25px -3px rgba(15, 31, 61, 0.05);
+  /* very soft shadow */
+  --shadow-lg: 0 20px 40px -5px rgba(15, 31, 61, 0.08);
+}
+
+/* Dark Theme (Public Pages) */
+.dark-theme {
+  --bg-main: #050505;
+  /* Pitch black */
+  --surface: #111111;
+  --surface-hover: #1A1A1A;
+  --border: #222222;
+  --border-dark: #333333;
+
+  --text-dark: #FFFFFF;
+  /* Inverted for dark theme readability conventions */
+  --text-light: #FFFFFF;
+  --text-muted: #888888;
+
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 10px 25px -3px rgba(0, 0, 0, 0.8);
+  --shadow-lg: 0 20px 40px -5px rgba(0, 0, 0, 1);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* We control the root background through the theme class applied to the body or layout wrapper */
+body {
+  background-color: var(--bg-main);
+  color: var(--text-dark);
+}
+
+/* Typography Base */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Sora', sans-serif;
+  color: var(--text-dark);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+}
+
+/* Common Layout Utilities */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.flex {
+  display: flex;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.gap-3 {
+  gap: 0.75rem;
+}
+
+.gap-4 {
+  gap: 1rem;
+}
+
+.gap-6 {
+  gap: 1.5rem;
+}
+
+.gap-8 {
+  gap: 2rem;
+}
+
+.gap-12 {
+  gap: 3rem;
+}
+
+/* Buttons & Inputs */
+a {
+  color: var(--text-dark);
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--accent-orange);
+  color: #FFFFFF;
+  padding: 0.875rem 1.75rem;
+  border-radius: var(--radius-btn);
+  font-weight: 600;
+  font-size: 1rem;
+  box-shadow: 0 4px 14px rgba(255, 90, 31, 0.3);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.light-theme .btn-primary {
+  background-color: var(--accent-teal);
+  box-shadow: 0 4px 14px rgba(0, 180, 216, 0.3);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.btn-outline {
+  border: 1px solid var(--border);
+  padding: 0.875rem 1.75rem;
+  border-radius: var(--radius-btn);
+  font-weight: 600;
+  font-size: 1rem;
+  background-color: transparent;
+  color: var(--text-dark);
+}
+
+.btn-outline:hover {
+  border-color: var(--border-dark);
+  background-color: var(--surface-hover);
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: var(--radius-btn);
+  border: 1px solid var(--border);
+  outline: none;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background-color: var(--surface);
+  color: var(--text-dark);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--accent-orange);
+}
+
+.light-theme input:focus,
+.light-theme textarea:focus,
+.light-theme select:focus {
+  border-color: var(--accent-teal);
+  box-shadow: 0 0 0 3px rgba(0, 180, 216, 0.1);
+}
+
+/* Cards */
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.badge-quick {
+  background-color: rgba(0, 180, 216, 0.1);
+  color: var(--accent-teal);
+}
+
+.badge-deep {
+  background-color: rgba(255, 195, 0, 0.15);
+  color: #B28800;
+}
+
+/* Sidebar Specific Utilities */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  margin-bottom: 0.25rem;
+}
+
+.sidebar-link:hover {
+  background-color: var(--surface-hover);
+  color: var(--text-dark);
+}
+
+.sidebar-link.active {
+  background-color: rgba(255, 195, 0, 0.15);
+  /* Borrowing the yellow from ref 2 */
+  color: #B28800;
+  font-weight: 600;
+}

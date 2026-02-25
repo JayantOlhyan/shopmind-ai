@@ -2,7 +2,7 @@ import time
 import logging
 from typing import Dict, Any
 
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import StateGraph
 
 from .models import AgentState
 from .memory import memory_store
@@ -130,12 +130,12 @@ def build_agent_graph():
     builder.add_node("store_memory", store_memory_node)
     
     # Add edges
-    builder.add_edge(START, "clarify")
+    builder.set_entry_point("clarify")
     builder.add_edge("clarify", "retrieve_memory")
     builder.add_edge("retrieve_memory", "research")
     builder.add_edge("research", "format")
     builder.add_edge("format", "store_memory")
-    builder.add_edge("store_memory", END)
+    builder.set_finish_point("store_memory")
     
     return builder.compile()
 

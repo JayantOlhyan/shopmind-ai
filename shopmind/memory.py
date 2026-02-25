@@ -4,7 +4,7 @@ import uuid
 import logging
 from typing import List, Dict, Any, Optional
 
-import voyageai
+from google import genai
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 
@@ -12,33 +12,33 @@ logger = logging.getLogger(__name__)
 
 class ShopMindMemory:
     def __init__(self):
-        self.voyage_api_key = os.getenv("VOYAGE_API_KEY")
+        self.gemini_api_key = os.getenv("GEMINI_API_KEY")
         self.qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
         self.qdrant_api_key = os.getenv("QDRANT_API_KEY")
         
         self.history_collection = "shopmind_history"
         self.prefs_collection = "shopmind_prefs"
-        self.embedding_model = "voyage-large-2-instruct"
-        self.vector_size = 1024  # Size for voyage-large-2-instruct
+        self.embedding_model = "text-embedding-004"
+        self.vector_size = 768  # Size for text-embedding-004
 
-        self.voyage_client = None
+        self.ai_client = None
         self.qdrant_client = None
         
         self._initialize_clients()
         
     def _initialize_clients(self):
         try:
-            if self.voyage_api_key:
-                self.voyage_client = voyageai.Client(api_key=self.voyage_api_key)
+            if self.gemini_api_key:
+                self.ai_client = genai.Client(api_key=self.gemini_api_key)
             else:
-                logger.warning("VOYAGE_API_KEY not set. Memory disabled.")
+                logger.warning("GEMINI_API_KEY not set. Memory disabled.")
                 
             if self.qdrant_url:
                 self.qdrant_client = QdrantClient(url=self.qdrant_url, api_key=self.qdrant_api_key)
                 self._ensure_collections()
         except Exception as e:
             logger.error(f"Failed to initialize memory clients: {e}")
-            self.voyage_client = None
+            self.ai_client = None
             self.qdrant_client = None
 
     def _ensure_collections(self):
@@ -57,15 +57,18 @@ class ShopMindMemory:
                     logger.info(f"Created collection {collection_name}")
         except Exception as e:
             logger.error(f"Failed to ensure collections: {e}")
-            self.qdrant_client = None # Disable Qdrant if we can't ensure collections
+            self.qdrant_client = None
 
     def _get_embedding(self, text: str) -> Optional[List[float]]:
-        if not self.voyage_client or not text.strip():
+        if not self.ai_client or not text.strip():
             return None
         try:
-            result = self.voyage_client.embed([text], model=self.embedding_model)
+            result = self.ai_client.models.embed_content(
+                model=self.embedding_model,
+                contents=text
+            )
             if result.embeddings and len(result.embeddings) > 0:
-                return result.embeddings[0]
+                return result.embeddings[0].values
         except Exception as e:
             logger.error(f"Embedding generation failed: {e}")
         return None
@@ -166,7 +169,6 @@ class ShopMindMemory:
             return {}
             
         try:
-            # We used a UUID5 seeded by user_id for the preference point ID
             point_id = str(uuid.uuid5(uuid.NAMESPACE_DNS, user_id))
             results = self.qdrant_client.retrieve(
                 collection_name=self.prefs_collection,

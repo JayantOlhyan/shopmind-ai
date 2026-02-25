@@ -1,9 +1,9 @@
 import time
 
 class CostTracker:
-    # Claude 3.5 Sonnet pricing per 1K tokens
-    INPUT_COST_PER_1K = 0.003
-    OUTPUT_COST_PER_1K = 0.015
+    # Gemini 1.5/2.5 Flash pricing (approx) per 1000 tokens
+    INPUT_COST_PER_1K = 0.000075
+    OUTPUT_COST_PER_1K = 0.0003
 
     def __init__(self):
         self.reset()

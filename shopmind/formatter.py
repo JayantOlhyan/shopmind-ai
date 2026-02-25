@@ -3,29 +3,28 @@ import json
 import logging
 from typing import Dict, Any
 
-from anthropic import Anthropic
-
-from .models import ResearchResponse, Finding
+from google import genai
+from google.genai import types
 
 logger = logging.getLogger(__name__)
 
 class Formatter:
     def __init__(self):
-        self.anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
-        self.claude = Anthropic(api_key=self.anthropic_api_key) if self.anthropic_api_key else None
-        self.model_name = "claude-3-5-sonnet-20241022"
+        self.gemini_api_key = os.getenv("GEMINI_API_KEY")
+        self.client = genai.Client(api_key=self.gemini_api_key) if self.gemini_api_key else None
+        self.model_name = "gemini-2.5-flash"
         
     def format_to_json(self, raw_report: str, query: str, mode: str) -> Dict[str, Any]:
         """
-        Takes raw text research and uses Claude to format it into the strict JSON schema.
+        Takes raw text research and uses Gemini to format it into the strict JSON schema.
         Returns a dict: {"report": Dict, "input_tokens": int, "output_tokens": int, "error": Optional[str]}
         """
-        if not self.claude:
-            return self._fallback_report(raw_report, query, mode, "Anthropic API key missing")
+        if not self.client:
+            return self._fallback_report(raw_report, query, mode, "Gemini API key missing")
             
-        system_prompt = (
+        system_instruction = (
             "You are a strict data formatter. Extract information from the provided research text "
-            "and format it EXACTLY according to this JSON schema. DO NOT wrap the output in markdown code blocks. "
+            "and format it EXACTLY according to this JSON schema. "
             "Return ONLY valid, parseable JSON.\n\n"
             "SCHEMA requirements:\n"
             "{\n"
@@ -47,28 +46,17 @@ class Formatter:
         user_prompt = f"Format this raw research text:\n\n{raw_report}"
 
         try:
-            response = self.claude.messages.create(
+            response = self.client.models.generate_content(
                 model=self.model_name,
-                max_tokens=2000,
-                system=system_prompt,
-                messages=[
-                    {"role": "user", "content": user_prompt}
-                ],
-                temperature=0.0
+                contents=user_prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=system_instruction,
+                    response_mime_type="application/json",
+                    temperature=0.0
+                )
             )
             
-            result_text = response.content[0].text.strip()
-            
-            # Remove markdown blocks if Claude inserted them anyway
-            if result_text.startswith("```json"):
-                result_text = result_text[7:]
-                if result_text.endswith("```"):
-                    result_text = result_text[:-3]
-            elif result_text.startswith("```"):
-                result_text = result_text[3:]
-                if result_text.endswith("```"):
-                    result_text = result_text[:-3]
-                    
+            result_text = response.text.strip()
             parsed_json = json.loads(result_text)
             
             # Map core fields that the API will build up
@@ -80,10 +68,16 @@ class Formatter:
                 "confidence_score": float(parsed_json.get("confidence_score", 0.5))
             }
             
+            input_tokens = 0
+            output_tokens = 0
+            if hasattr(response, 'usage_metadata') and response.usage_metadata:
+                input_tokens = getattr(response.usage_metadata, 'prompt_token_count', 0)
+                output_tokens = getattr(response.usage_metadata, 'candidates_token_count', 0)
+            
             return {
                 "report": report,
-                "input_tokens": response.usage.input_tokens,
-                "output_tokens": response.usage.output_tokens,
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
                 "error": None
             }
             
